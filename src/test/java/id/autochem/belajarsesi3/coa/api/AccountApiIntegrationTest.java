@@ -53,7 +53,7 @@ class AccountApiIntegrationTest {
     JdbcTemplate jdbc;
 
     @AfterEach
-    void cleanUp() { // sisakan 5 akun induk dari migration V2
+    void cleanUp() { // sisakan 5 akun induk dari migration V2 (seed_root_accounts)
         jdbc.update("DELETE FROM account WHERE code NOT IN ('1000','2000','3000','4000','5000')");
     }
 

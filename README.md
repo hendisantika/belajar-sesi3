@@ -19,7 +19,7 @@ Syarat: JDK 25 dan Docker.
 ./mvnw spring-boot:run
 ```
 
-Spring Boot Docker Compose otomatis menyalakan PostgreSQL dari `compose.yaml` dan menghubungkan datasource ke container tersebut. Port host container dibuat acak agar tidak bentrok dengan PostgreSQL lokal. Cek dengan `docker compose port postgres 5432`. Flyway menjalankan migration `V1` (tabel `account`) dan `V2` (5 akun induk: 1000–5000).
+Spring Boot Docker Compose otomatis menyalakan PostgreSQL dari `compose.yaml` dan menghubungkan datasource ke container tersebut. Port host container dibuat acak agar tidak bentrok dengan PostgreSQL lokal. Cek dengan `docker compose port postgres 5432`. Flyway menjalankan migration `V1_24112026_1242__create_account.sql` (tabel `account`) dan `V2_24112026_1242__seed_root_accounts.sql` (5 akun induk: 1000–5000). Format nama migration: `Vx_DDMMYYYY_HHMM__description.sql`.
 
 Di luar Docker Compose, datasource dibaca dari environment `DB_URL`, `DB_USERNAME`, dan `DB_PASSWORD`.
 
