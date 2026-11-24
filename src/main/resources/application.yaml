@@ -12,6 +12,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100      # batasi ukuran halaman dari query string
   flyway:
     enabled: true
     locations: classpath:db/migration
