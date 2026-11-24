@@ -1,0 +1,120 @@
+### =====================================================================
+### Koleksi uji COA API - Sesi 3 (IntelliJ HTTP Client / VS Code REST Client)
+### Jalankan berurutan dari atas. Ganti @host bila port berbeda.
+### Postman / Bruno: import docs/openapi.yaml
+### =====================================================================
+@host = http://localhost:8080
+@base = {{host}}/api/v1/accounts
+
+### 1. Buat akun valid -> 201 + Location
+POST {{base}}
+Content-Type: application/json
+X-Correlation-Id: skenario-1
+
+{
+  "code": "1101",
+  "name": "Kas",
+  "type": "ASSET",
+  "parentCode": "1000"
+}
+
+> {%
+    client.test("201 Created + Location", () => {
+        client.assert(response.status === 201, "status " + response.status);
+        client.assert(response.headers.valueOf("Location") !== null, "Location kosong");
+    });
+    client.global.set("accountId", response.body.id);
+%}
+
+### 2. Kode duplikat -> 409 Conflict
+POST {{base}}
+Content-Type: application/json
+
+{
+  "code": "1101",
+  "name": "Kas Kecil",
+  "type": "ASSET"
+}
+
+> {%
+    client.test("409 Conflict", () => {
+        client.assert(response.status === 409, "status " + response.status);
+        client.assert(response.body.detail === "Kode akun 1101 sudah digunakan");
+    });
+%}
+
+### 3. Payload tidak valid -> 400 + daftar error
+POST {{base}}
+Content-Type: application/json
+
+{
+  "code": ""
+}
+
+> {%
+    client.test("400 + errors", () => {
+        client.assert(response.status === 400, "status " + response.status);
+        client.assert(response.body.errors.includes("code: must not be blank"));
+    });
+%}
+
+### 4. Detail tidak ada -> 404 Not Found
+GET {{base}}/9999
+
+> {%
+    client.test("404 Not Found", () => {
+        client.assert(response.status === 404, "status " + response.status);
+        client.assert(response.body.detail === "Akun 9999 tidak ditemukan");
+    });
+%}
+
+### 5. Ubah nama akun -> 200 + data baru
+PUT {{base}}/{{accountId}}
+Content-Type: application/json
+
+{
+  "name": "Kas Besar",
+  "type": "ASSET",
+  "parentCode": "1000"
+}
+
+> {%
+    client.test("200 + nama baru", () => {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.name === "Kas Besar");
+    });
+%}
+
+### 6. Nonaktifkan akun -> 204
+PATCH {{base}}/{{accountId}}/deactivate
+
+> {%
+    client.test("204 No Content", () => {
+        client.assert(response.status === 204, "status " + response.status);
+    });
+%}
+
+### 6b. Akun nonaktif tidak muncul di daftar aktif
+GET {{base}}?page=0&size=100&sort=code,asc
+
+> {%
+    client.test("1101 tidak ada di daftar aktif", () => {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(!response.body.content.some(a => a.code === "1101"));
+    });
+%}
+
+### 6c. Detail tetap bisa dilihat dengan active=false
+GET {{base}}/{{accountId}}
+
+### ---------------------------------------------------------------------
+### Middleware (Step 7)
+### ---------------------------------------------------------------------
+
+### Endpoint ber-anotasi tanpa header -> 400 (controller tidak dipanggil)
+POST {{host}}/api/v1/journals/1/post
+
+### Dengan header -> lanjut ke controller (501: jurnal diimplementasikan di Sesi 4)
+POST {{host}}/api/v1/journals/1/post
+Idempotency-Key: post-1
+X-Correlation-Id: abc-123
