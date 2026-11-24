@@ -6,4 +6,6 @@ services:
       - 'POSTGRES_USER=accounting'
       - 'POSTGRES_PASSWORD=accounting'
     ports:
-      - '5432:5432'
+      # Port host acak agar tidak bentrok dengan PostgreSQL lokal; Spring Boot Docker Compose
+      # otomatis memakai port yang terpetakan (cek manual: docker compose port postgres 5432)
+      - '5432'
