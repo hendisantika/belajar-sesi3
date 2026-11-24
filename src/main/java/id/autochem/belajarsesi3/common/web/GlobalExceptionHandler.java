@@ -42,8 +42,6 @@ import java.util.stream.Stream;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    static final String MDC_REQUEST_ID = "correlationId";
-
     @ExceptionHandler(AccountNotFoundException.class)
     ProblemDetail notFound(AccountNotFoundException ex) {
         return problem(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -64,6 +62,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail dataIntegrity(DataIntegrityViolationException ex) {
         log.warn("Pelanggaran constraint database: {}", ex.getMostSpecificCause().getMessage());
         return problem(HttpStatus.CONFLICT, "Data bertentangan dengan data yang sudah ada");
+    }
+
+    @ExceptionHandler(MissingIdempotencyKeyException.class)
+    ProblemDetail missingIdempotencyKey(MissingIdempotencyKeyException ex) {
+        return problem(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
@@ -123,7 +126,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private static ProblemDetail withRequestId(ProblemDetail pd) {
-        String requestId = MDC.get(MDC_REQUEST_ID);
+        String requestId = MDC.get(CorrelationIdFilter.MDC_KEY);
         if (requestId != null) {
             pd.setProperty("requestId", requestId);
         }
