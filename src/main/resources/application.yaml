@@ -1,3 +1,22 @@
 spring:
   application:
     name: belajar-sesi3
+  datasource:
+    url: jdbc:postgresql://localhost:5432/accounting
+    username: accounting
+    password: accounting
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate        # skema dikelola Flyway, Hibernate hanya memvalidasi
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+logging:
+  pattern:
+    # %X{correlationId} membaca nilai MDC yang diisi CorrelationIdFilter
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{20} : %msg%n"
