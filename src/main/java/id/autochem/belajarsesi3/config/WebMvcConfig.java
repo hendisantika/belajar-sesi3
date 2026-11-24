@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -30,6 +31,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")                 // berlaku untuk API
                 .excludePathPatterns("/api/v1/health/**")   // pengecualian
                 .order(1);
+    }
+
+    // springdoc 3.2 memetakan halaman utama ke /swagger-ui; URL lama /swagger-ui.html tetap dilayani
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/swagger-ui.html", "/swagger-ui/index.html");
     }
 
     @Override

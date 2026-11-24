@@ -21,7 +21,31 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs                  # default
+  swagger-ui:
+    path: /swagger-ui              # default
+    operations-sorter: method           # urut GET, POST, PUT, ...
+    tags-sorter: alpha
+    try-it-out-enabled: true            # tombol Try it out aktif
+    display-request-duration: true
+  # Cakupan endpoint diatur per grup di OpenApiConfig (GroupedOpenApi.pathsToMatch).
+  # Jangan set springdoc.paths-to-match global: nilainya menimpa filter per grup.
+  default-produces-media-type: application/json
+
 logging:
   pattern:
     # %X{correlationId} membaca nilai MDC yang diisi CorrelationIdFilter
     console: "%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{20} : %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+springdoc:
+  swagger-ui:
+    enabled: false                      # UI dimatikan di production
+  api-docs:
+    enabled: false
